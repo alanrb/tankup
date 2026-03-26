@@ -14,6 +14,19 @@
 
 ## Screens
 
+### Disclaimer Screen
+
+Shown **every launch** before the app starts. Informs the user that:
+
+- Fuel prices are sourced from an **unofficial** channel
+- Data is for reference only and may not be accurate
+- The app is **for fun only** — not for financial decisions
+- The developer takes **no responsibility** for any decisions made based on app data
+
+Users must choose **Thoát** (exit) or **Tiếp tục** (continue) — the back button is disabled.
+
+---
+
 ### Screen 1 — Select Vehicle
 
 - Tab switcher: **🏍️ Xe máy** | ** Ô tô**
@@ -108,6 +121,7 @@ Multi-grade bikes (`[ron92, ron95]`): Future 125, Vision, Air Blade, Lead 125, J
 | Brand | Models |
 |---|---|
 | Toyota | Vios, Corolla Cross, Innova Cross, Fortuner *(diesel)*, Raize |
+| Honda | City, Civic, HR-V, CR-V, Accord *(hybrid)* |
 | Hyundai | Accent, Creta, Tucson, Santa Fe |
 | Kia | Morning, Seltos, Sorento |
 | Mazda | Mazda2, CX-5, CX-8 |
