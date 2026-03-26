@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tankup/blocs/fuel/fuel_cubit.dart';
 import 'package:tankup/blocs/vehicle/vehicle_cubit.dart';
-import 'package:tankup/screens/screen1_vehicle.dart';
+import 'package:tankup/screens/screen_disclaimer.dart';
 
 void main() {
   runApp(const TankUpApp());
@@ -28,7 +28,7 @@ class TankUpApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        home: const Screen1Vehicle(),
+        home: const DisclaimerScreen(),
       ),
     );
   }

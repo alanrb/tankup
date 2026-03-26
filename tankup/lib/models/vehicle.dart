@@ -635,6 +635,73 @@ final _vinfast = VehicleBrandGroup(
   ],
 );
 
+final _hondaCar = VehicleBrandGroup(
+  brand: 'Honda',
+  type: VehicleType.car,
+  vehicles: [
+    Vehicle(
+      name: 'City',
+      brand: 'Honda',
+      tankCapacity: 35.5,
+      emoji: '🚗',
+      description: 'Sedan hạng B tiết kiệm phổ biến',
+      type: VehicleType.car,
+      engineCC: 1498,
+      transmission: 'CVT tự động',
+      fuelGrades: [VehicleFuelGrade.ron95],
+      priceVND: 499000000,
+    ),
+    Vehicle(
+      name: 'Civic',
+      brand: 'Honda',
+      tankCapacity: 46.0,
+      emoji: '🚗',
+      description: 'Sedan hạng C thể thao năng động',
+      type: VehicleType.car,
+      engineCC: 1498,
+      transmission: 'CVT tự động',
+      fuelGrades: [VehicleFuelGrade.ron95],
+      priceVND: 770000000,
+    ),
+    Vehicle(
+      name: 'HR-V',
+      brand: 'Honda',
+      tankCapacity: 40.0,
+      emoji: '🚙',
+      description: 'B-SUV thiết kế hiện đại',
+      type: VehicleType.car,
+      engineCC: 1498,
+      transmission: 'CVT tự động',
+      fuelGrades: [VehicleFuelGrade.ron95],
+      priceVND: 699000000,
+    ),
+    Vehicle(
+      name: 'CR-V',
+      brand: 'Honda',
+      tankCapacity: 57.0,
+      emoji: '🚙',
+      description: 'C-SUV 5/7 chỗ hybrid tiết kiệm',
+      type: VehicleType.car,
+      engineCC: 1498,
+      transmission: 'CVT tự động',
+      fuelGrades: [VehicleFuelGrade.ron95],
+      priceVND: 998000000,
+    ),
+    Vehicle(
+      name: 'Accord',
+      brand: 'Honda',
+      tankCapacity: 56.0,
+      emoji: '🚗',
+      description: 'Sedan D-segment hybrid cao cấp',
+      type: VehicleType.car,
+      engineCC: 1993,
+      transmission: 'e-CVT hybrid',
+      fuelGrades: [VehicleFuelGrade.ron95],
+      priceVND: 1319000000,
+    ),
+  ],
+);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPORTED LISTS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -648,6 +715,7 @@ final List<VehicleBrandGroup> motorbikeGroups = [
 
 final List<VehicleBrandGroup> carGroups = [
   _toyota,
+  _hondaCar,
   _hyundai,
   _kia,
   _mazda,
