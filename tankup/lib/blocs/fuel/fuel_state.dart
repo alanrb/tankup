@@ -1,4 +1,3 @@
-import 'package:tankup/data/fuel_price.dart';
 import 'package:tankup/models/fuel.dart';
 import 'package:tankup/services/fuel_price_service.dart';
 
@@ -41,7 +40,7 @@ class FuelState {
     final useVung2 = vung2Override ?? isVung2;
     final live = liveResult?.prices[fuelId];
     if (live != null) return useVung2 ? live.vung2 : live.vung1;
-    return getPriceForFuel(fuelId, isVung2: useVung2);
+    return 0;
   }
 
   int get totalVND {

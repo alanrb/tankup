@@ -60,6 +60,13 @@ class FuelCubit extends Cubit<FuelState> {
     emit(state.copyWith(liveResult: result));
   }
 
+  /// Force a network refresh regardless of cache, resetting to loading state first.
+  Future<void> forceRefreshPrices() async {
+    emit(state.copyWith(clearLiveResult: true));
+    final result = await FuelPriceService.instance.forceRefresh();
+    emit(state.copyWith(liveResult: result));
+  }
+
   void reset() {
     emit(state.copyWith(
       clearFuel: true,

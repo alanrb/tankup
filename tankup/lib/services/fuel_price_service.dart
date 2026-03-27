@@ -38,10 +38,14 @@ class FuelPriceService {
   static final FuelPriceService instance = FuelPriceService._();
 
   static const _url = 'https://webgia.com/gia-xang-dau/petrolimex/';
+  static const _urlFallback = 'https://webgia.com/gia-xang-dau/';
   static const _keyJson = 'fuel_prices_json';
   static const _keyFetchedAt = 'fuel_prices_fetched_at';
-  static const _cacheValidDuration = Duration(hours: 12);
+  static const _cacheValidDuration = Duration(hours: 4);
   static const _timeout = Duration(seconds: 10);
+  static const _minValidPrice = 15000;
+  static const _maxValidPrice = 100000;
+  static const _minFuelsRequired = 4;
 
   // Row keyword → fuelId mapping
   static const _rowMap = {
@@ -75,7 +79,7 @@ class FuelPriceService {
     final hasNetwork = connectivity.any((c) => c != ConnectivityResult.none);
 
     if (!hasNetwork) {
-      final fallback = diskCached ?? _hardcodedResult();
+      final fallback = diskCached ?? _emptyResult();
       _memCache = fallback;
       return fallback;
     }
@@ -106,38 +110,30 @@ class FuelPriceService {
   // ── Private ────────────────────────────────────────────────────────────────
 
   Future<LivePriceResult> _fetchLive({required LivePriceResult? fallback}) async {
-    try {
-      final response = await http
-          .get(Uri.parse(_url))
-          .timeout(_timeout);
+    for (final url in [_url, _urlFallback]) {
+      try {
+        final response = await http.get(Uri.parse(url)).timeout(_timeout);
+        if (response.statusCode != 200) continue;
 
-      if (response.statusCode != 200) {
-        throw Exception('HTTP ${response.statusCode}');
+        final prices = _parseHtml(response.body);
+        if (prices.length < _minFuelsRequired) continue;
+
+        final result = LivePriceResult(
+          prices: prices,
+          source: PriceSource.live,
+          fetchedAt: DateTime.now(),
+        );
+        await _saveToPrefs(prices);
+        _memCache = result;
+        return result;
+      } catch (_) {
+        continue;
       }
-
-      final prices = _parseHtml(response.body);
-      if (prices.isEmpty) throw Exception('Parse returned empty');
-
-      final result = LivePriceResult(
-        prices: prices,
-        source: PriceSource.live,
-        fetchedAt: DateTime.now(),
-      );
-
-      await _saveToPrefs(prices);
-      _memCache = result;
-      return result;
-    } catch (e) {
-      final fallbackResult = fallback ??
-          LivePriceResult(
-            prices: _pricesFromFallback(PriceSource.hardcoded),
-            source: PriceSource.hardcoded,
-            fetchedAt: DateTime.now(),
-            errorMessage: e.toString(),
-          );
-      _memCache = fallbackResult;
-      return fallbackResult;
     }
+
+    final fallbackResult = fallback ?? _emptyResult();
+    _memCache = fallbackResult;
+    return fallbackResult;
   }
 
   /// Parse HTML table into a fuelId → FuelPriceEntry map.
@@ -147,20 +143,23 @@ class FuelPriceService {
     final result = <String, FuelPriceEntry>{};
 
     for (final row in rows) {
-      final cells = row.querySelectorAll('td');
-      if (cells.length < 3) continue;
+      final th = row.querySelector('th');
+      final tds = row.querySelectorAll('td');
+      if (th == null || tds.length < 2) continue;
 
-      final productText = cells[0].text;
-      final vung1 = _parsePrice(cells[1].text);
-      final vung2 = _parsePrice(cells[2].text);
-      if (vung1 == 0) continue;
+      // Normalize whitespace before matching to handle encoding variations
+      final productText = th.text.trim().replaceAll(RegExp(r'\s+'), ' ');
+      final vung1 = _parsePrice(tds[0].text);
+      final vung2 = _parsePrice(tds[1].text);
+      if (vung1 == 0 || !_isPriceValid(vung1)) continue;
 
       for (final entry in _rowMap.entries) {
         if (productText.contains(entry.key)) {
           result[entry.value] = FuelPriceEntry(
             fuelId: entry.value,
             vung1: vung1,
-            vung2: vung2,
+            // Fall back to vung1 if vung2 is missing or invalid
+            vung2: _isPriceValid(vung2) ? vung2 : vung1,
           );
           break;
         }
@@ -176,6 +175,9 @@ class FuelPriceService {
 
   int _parsePrice(String text) =>
       int.tryParse(text.trim().replaceAll('.', '').replaceAll(',', '')) ?? 0;
+
+  bool _isPriceValid(int price) =>
+      price >= _minValidPrice && price <= _maxValidPrice;
 
   // ── SharedPreferences ──────────────────────────────────────────────────────
 
@@ -220,16 +222,8 @@ class FuelPriceService {
     }
   }
 
-  // ── Hardcoded fallback ─────────────────────────────────────────────────────
-
-  Map<String, FuelPriceEntry> _pricesFromFallback(PriceSource _) {
-    return {
-      for (final entry in currentPrices.prices) entry.fuelId: entry,
-    };
-  }
-
-  LivePriceResult _hardcodedResult() => LivePriceResult(
-        prices: _pricesFromFallback(PriceSource.hardcoded),
+  LivePriceResult _emptyResult() => LivePriceResult(
+        prices: const {},
         source: PriceSource.hardcoded,
         fetchedAt: DateTime.now(),
       );

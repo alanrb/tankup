@@ -51,7 +51,10 @@ class _Screen2FuelState extends State<Screen2Fuel> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // ── Price status badge ────────────────────────────
-                          _PriceStatusBadge(liveResult: fuelState.liveResult),
+                          _PriceStatusBadge(
+                            liveResult: fuelState.liveResult,
+                            onRefresh: () => context.read<FuelCubit>().forceRefreshPrices(),
+                          ),
                           const SizedBox(height: 12),
 
                           // ── Fuel type cards ──────────────────────────────
@@ -103,14 +106,16 @@ class _Screen2FuelState extends State<Screen2Fuel> {
 // ─── Price status badge ───────────────────────────────────────────────────────
 
 class _PriceStatusBadge extends StatelessWidget {
-  const _PriceStatusBadge({required this.liveResult});
+  const _PriceStatusBadge({required this.liveResult, required this.onRefresh});
   final LivePriceResult? liveResult;
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isLoading = liveResult == null;
     String text;
-    if (liveResult == null) {
+    if (isLoading) {
       text = 'Đang tải giá...';
     } else {
       final t = liveResult!.fetchedAt;
@@ -127,16 +132,27 @@ class _PriceStatusBadge extends StatelessWidget {
       }
     }
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 12, color: cs.onSurface.withValues(alpha: 0.7)),
+    return GestureDetector(
+      onTap: isLoading ? null : onRefresh,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(fontSize: 12, color: cs.onSurface.withValues(alpha: 0.7)),
+              ),
+            ),
+            if (!isLoading)
+              Icon(Icons.refresh, size: 14, color: cs.onSurface.withValues(alpha: 0.4)),
+          ],
+        ),
       ),
     );
   }
@@ -232,8 +248,7 @@ class _FuelAmountSection extends StatelessWidget {
     final cubit = context.read<FuelCubit>();
     final max = vehicle.tankCapacity;
     final fuel = fuelState.selectedFuel!;
-    final total = calculateTotal(
-        fuel: fuel, litres: fuelState.litres, isVung2: fuelState.isVung2);
+    final total = fuelState.totalVND;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

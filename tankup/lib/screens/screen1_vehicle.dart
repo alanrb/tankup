@@ -4,7 +4,6 @@ import 'package:tankup/blocs/fuel/fuel_cubit.dart';
 import 'package:tankup/blocs/fuel/fuel_state.dart';
 import 'package:tankup/blocs/vehicle/vehicle_cubit.dart';
 import 'package:tankup/blocs/vehicle/vehicle_state.dart';
-import 'package:tankup/data/fuel_price.dart';
 import 'package:tankup/models/fuel.dart';
 import 'package:tankup/models/vehicle.dart';
 import 'package:tankup/screens/screen2_fuel.dart';
@@ -376,15 +375,6 @@ class _FuelPriceSheet extends StatelessWidget {
                   );
                 }),
 
-                const Divider(height: 20),
-
-                // ── Effective date footer ─────────────────────────────────
-                Text(
-                  'Hiệu lực từ ${currentPrices.effectiveFrom}',
-                  style: TextStyle(
-                      fontSize: 11,
-                      color: cs.onSurface.withValues(alpha: 0.5)),
-                ),
               ],
             ),
           ),
